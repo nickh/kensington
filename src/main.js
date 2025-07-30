@@ -1,4 +1,3 @@
-import './style.css'
 import { GameBoard } from './gameBoard.js'
 
 document.querySelector('#app').innerHTML = `
