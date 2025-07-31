@@ -92,13 +92,38 @@ export class GameBoard {
   }
 
   setupCanvas() {
-    // Reserve space for the UI panel on the right (200px)
-    const uiPanelWidth = 200
-    const availableWidth = window.innerWidth - uiPanelWidth
+    // Detect if we're on a mobile device
+    const isMobile = window.innerWidth <= 480
+    const isTablet = window.innerWidth <= 768 && window.innerWidth > 480
+    
+    let uiPanelWidth
+    let availableWidth
+    let maxWidthMultiplier
+    let maxHeightMultiplier
+    
+    if (isMobile) {
+      // On mobile, stack UI below the board (no side panel)
+      uiPanelWidth = 0
+      availableWidth = window.innerWidth
+      maxWidthMultiplier = 0.95 // Use more of the screen width
+      maxHeightMultiplier = 0.6  // Leave room for UI below
+    } else if (isTablet) {
+      // On tablet, use a smaller side panel
+      uiPanelWidth = 150
+      availableWidth = window.innerWidth - uiPanelWidth
+      maxWidthMultiplier = 0.92
+      maxHeightMultiplier = 0.75
+    } else {
+      // Desktop: original layout with side panel
+      uiPanelWidth = 200
+      availableWidth = window.innerWidth - uiPanelWidth
+      maxWidthMultiplier = 0.9
+      maxHeightMultiplier = 0.7
+    }
     
     // Set canvas size based on board image and viewport, leaving room for UI
-    const maxWidth = Math.min(availableWidth * 0.9, this.boardWidth)
-    const maxHeight = Math.min(window.innerHeight * 0.7, this.boardHeight)
+    const maxWidth = Math.min(availableWidth * maxWidthMultiplier, this.boardWidth)
+    const maxHeight = Math.min(window.innerHeight * maxHeightMultiplier, this.boardHeight)
     
     // Calculate scale to fit the board in the viewport
     this.scale = Math.min(maxWidth / this.boardWidth, maxHeight / this.boardHeight)
@@ -110,14 +135,17 @@ export class GameBoard {
     this.canvas.width = totalCanvasWidth
     this.canvas.height = this.boardHeight * this.scale
     
-    // Store the board area width for UI positioning
+    // Store layout info for UI positioning
     this.boardAreaWidth = boardCanvasWidth
+    this.uiPanelWidth = uiPanelWidth
+    this.isMobileLayout = isMobile
+    this.isTabletLayout = isTablet
     
     // Set CSS size for crisp rendering
     this.canvas.style.width = `${this.canvas.width}px`
     this.canvas.style.height = `${this.canvas.height}px`
     
-    console.log(`Canvas setup: ${this.canvas.width}x${this.canvas.height}, scale: ${this.scale}, board area: ${this.boardAreaWidth}px`)
+    console.log(`Canvas setup: ${this.canvas.width}x${this.canvas.height}, scale: ${this.scale}, board area: ${this.boardAreaWidth}px, mobile: ${isMobile}, tablet: ${isTablet}`)
   }
 
   setupEventListeners() {
@@ -216,15 +244,17 @@ export class GameBoard {
       this.drawMillShapes()
     }
     
-    // Draw separator line between board and UI
-    this.ctx.save()
-    this.ctx.strokeStyle = '#cccccc'
-    this.ctx.lineWidth = 2
-    this.ctx.beginPath()
-    this.ctx.moveTo(this.boardAreaWidth + 10, 0)
-    this.ctx.lineTo(this.boardAreaWidth + 10, this.canvas.height)
-    this.ctx.stroke()
-    this.ctx.restore()
+    // Draw separator line between board and UI (only for non-mobile layouts)
+    if (!this.isMobileLayout) {
+      this.ctx.save()
+      this.ctx.strokeStyle = '#cccccc'
+      this.ctx.lineWidth = 2
+      this.ctx.beginPath()
+      this.ctx.moveTo(this.boardAreaWidth + 10, 0)
+      this.ctx.lineTo(this.boardAreaWidth + 10, this.canvas.height)
+      this.ctx.stroke()
+      this.ctx.restore()
+    }
     
     // Highlight selected vertex if any
     if (this.selectedVertex) {
@@ -1887,12 +1917,28 @@ export class GameBoard {
   }
 
   getNewGameButtonArea() {
-    // Calculate button position and size in the right panel
-    const buttonWidth = 120
-    const buttonHeight = 30
-    const rightPanelX = this.boardAreaWidth + 20
-    const buttonX = rightPanelX + 10
-    const buttonY = this.canvas.height - 80
+    // Calculate button position and size based on layout
+    let buttonWidth, buttonHeight, buttonX, buttonY
+    
+    if (this.isMobileLayout) {
+      // Mobile: button in overlay area
+      buttonWidth = 100
+      buttonHeight = 25
+      buttonX = 15
+      buttonY = 140 // After the winner text in overlay
+    } else if (this.isTabletLayout) {
+      // Tablet: smaller button in side panel
+      buttonWidth = 100
+      buttonHeight = 25
+      buttonX = this.boardAreaWidth + 25
+      buttonY = this.canvas.height - 70
+    } else {
+      // Desktop: original button in side panel
+      buttonWidth = 120
+      buttonHeight = 30
+      buttonX = this.boardAreaWidth + 30
+      buttonY = this.canvas.height - 80
+    }
     
     return {
       x: buttonX,
@@ -1905,49 +1951,83 @@ export class GameBoard {
   drawGameUI() {
     this.ctx.save()
     
-    // Use the actual board area width we calculated in setupCanvas
-    const rightPanelX = this.boardAreaWidth + 20 // Start right panel 20px after board area
+    let rightPanelX, fontSize, maxWidth
     
-    // Draw game status on the right side
-    this.ctx.fillStyle = '#000000'
-    this.ctx.font = '16px Arial'
+    if (this.isMobileLayout) {
+      // Mobile: minimal overlay for current player only
+      rightPanelX = 10
+      fontSize = 12
+      maxWidth = this.canvas.width - 20
+    } else if (this.isTabletLayout) {
+      // Tablet: smaller side panel
+      rightPanelX = this.boardAreaWidth + 15
+      fontSize = 14
+      maxWidth = this.uiPanelWidth - 25
+    } else {
+      // Desktop: full side panel
+      rightPanelX = this.boardAreaWidth + 20
+      fontSize = 16
+      maxWidth = this.uiPanelWidth - 30
+    }
+    
+    // Draw game status
+    this.ctx.fillStyle = this.isMobileLayout ? 'rgba(255, 255, 255, 0.9)' : '#000000'
+    this.ctx.font = `${fontSize}px Arial`
     this.ctx.textAlign = 'left'
     this.ctx.textBaseline = 'top'
     
-    // Game state info
+    let currentY = this.isMobileLayout ? 10 : 10
+    
+    // Add minimal background for mobile overlay (only current player info)
+    if (this.isMobileLayout) {
+      const playerText = `${this.currentPlayer.charAt(0).toUpperCase() + this.currentPlayer.slice(1)} player's turn`
+      const textWidth = this.ctx.measureText(playerText).width
+      this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'
+      this.ctx.fillRect(5, 5, Math.min(textWidth + 20, maxWidth + 10), 25)
+      this.ctx.fillStyle = this.currentPlayer === 'red' ? 'rgba(255, 150, 150, 0.95)' : 'rgba(150, 150, 255, 0.95)'
+      this.ctx.fillText(playerText, rightPanelX, currentY)
+      this.ctx.restore()
+      return // Exit early for mobile - use HTML UI below canvas instead
+    }
+    
+    // Game state info (non-mobile)
     let stateText = `Phase: ${this.gameState === 'placement' ? 'Placement' : 'Movement'}`
     if (this.millRemovalState === 'removing') {
       stateText += ' (Mill Removal)'
     }
-    this.ctx.fillText(stateText, rightPanelX, 10)
+    this.ctx.fillText(stateText, rightPanelX, currentY)
+    currentY += fontSize + 5
     
     // Player info
     const redTokens = this.gameState === 'placement' ? this.redTokensPlaced : this.tokens.filter(t => t.color === 'red').length
     const blueTokens = this.gameState === 'placement' ? this.blueTokensPlaced : this.tokens.filter(t => t.color === 'blue').length
     this.ctx.fillStyle = '#ff4444'
-    this.ctx.fillText(`Red: ${redTokens}/${this.maxTokensPerPlayer}`, rightPanelX, 35)
+    this.ctx.fillText(`Red: ${redTokens}/${this.maxTokensPerPlayer}`, rightPanelX, currentY)
+    currentY += fontSize + 5
     this.ctx.fillStyle = '#4444ff'
-    this.ctx.fillText(`Blue: ${blueTokens}/${this.maxTokensPerPlayer}`, rightPanelX, 60)
+    this.ctx.fillText(`Blue: ${blueTokens}/${this.maxTokensPerPlayer}`, rightPanelX, currentY)
+    currentY += fontSize + 5
     
     // Mill removal info
     if (this.millRemovalState === 'removing') {
       this.ctx.fillStyle = '#ff8800'
-      this.ctx.fillText(`Opponent moves: ${this.remainingOpponentMoves}`, rightPanelX, 85)
+      this.ctx.fillText(`Opponent moves: ${this.remainingOpponentMoves}`, rightPanelX, currentY)
+      currentY += fontSize + 5
     }
     
     // Current player and message (wrap long messages)
     this.ctx.fillStyle = this.currentPlayer === 'red' ? '#ff4444' : '#4444ff'
-    const messageY = this.millRemovalState === 'removing' ? 110 : 85
-    this.drawWrappedText(this.gameMessage, rightPanelX, messageY, this.canvas.width - rightPanelX - 10, 18)
+    this.drawWrappedText(this.gameMessage, rightPanelX, currentY, maxWidth, fontSize + 2)
     
-    // Winner announcement and New Game button in the UI panel
+    // Winner announcement and New Game button
     if (this.gameWinner) {
+      const winnerY = this.canvas.height - 120
       this.ctx.fillStyle = '#000000'
-      this.ctx.font = 'bold 18px Arial'
+      this.ctx.font = `bold ${fontSize + 2}px Arial`
       this.ctx.textAlign = 'left'
       this.ctx.textBaseline = 'top'
-      this.ctx.fillText(`${this.gameWinner.toUpperCase()}`, rightPanelX, this.canvas.height - 120)
-      this.ctx.fillText('WINS!', rightPanelX, this.canvas.height - 100)
+      this.ctx.fillText(`${this.gameWinner.toUpperCase()}`, rightPanelX, winnerY)
+      this.ctx.fillText('WINS!', rightPanelX, winnerY + fontSize + 5)
       
       // Draw New Game button
       const buttonArea = this.getNewGameButtonArea()
@@ -1963,7 +2043,7 @@ export class GameBoard {
       
       // Button text
       this.ctx.fillStyle = '#ffffff'
-      this.ctx.font = 'bold 14px Arial'
+      this.ctx.font = `bold ${fontSize - 2}px Arial`
       this.ctx.textAlign = 'center'
       this.ctx.textBaseline = 'middle'
       this.ctx.fillText('New Game', buttonArea.x + buttonArea.width / 2, buttonArea.y + buttonArea.height / 2)

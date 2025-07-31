@@ -16,16 +16,19 @@
 body {
   margin: 0;
   display: flex;
-  place-items: center;
+  flex-direction: column;
   min-width: 320px;
   min-height: 100vh;
+  padding: 0;
 }
 
 #app {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 h1 {
@@ -38,9 +41,95 @@ h1 {
   border-radius: 8px;
   margin: 1rem 0;
   background: white;
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 #game-info {
   margin-top: 1rem;
   font-size: 1.1em;
+}
+
+#mobile-ui {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+#mobile-status {
+  background: transparent;
+  padding: 0;
+}
+
+/* Desktop styles (default) */
+@media (min-width: 769px) {
+  body {
+    display: flex;
+    place-items: center;
+    min-height: 100vh;
+  }
+  
+  #app {
+    padding: 2rem;
+  }
+  
+  h1 {
+    font-size: 2.5em;
+  }
+  
+  #mobile-ui {
+    display: none !important;
+  }
+}
+
+/* Tablet styles */
+@media (max-width: 768px) and (min-width: 481px) {
+  body {
+    padding: 0.5rem;
+  }
+  
+  #app {
+    padding: 1rem;
+  }
+  
+  h1 {
+    font-size: 2em;
+    margin-bottom: 0.5rem;
+  }
+  
+  #game-canvas {
+    margin: 0.5rem 0;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 480px) {
+  body {
+    padding: 0.25rem;
+  }
+  
+  #app {
+    padding: 0.5rem;
+  }
+  
+  h1 {
+    font-size: 1.8em;
+    margin-bottom: 0.5rem;
+  }
+  
+  #game-canvas {
+    margin: 0.5rem 0;
+    border-radius: 4px;
+    border-width: 1px;
+  }
+  
+  #game-info {
+    font-size: 1em;
+    margin-top: 0.5rem;
+  }
+  
+  #mobile-ui {
+    display: block !important;
+  }
 }
