@@ -87,7 +87,7 @@ export class GameBoard {
         console.error('Failed to load board image:', error)
         reject(new Error('Failed to load board image'))
       }
-      this.boardImage.src = './Kensington_board.svg.png'
+      this.boardImage.src = '../Kensington_board.svg.png'
     })
   }
 
