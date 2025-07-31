@@ -1980,14 +1980,9 @@ export class GameBoard {
     
     // Add minimal background for mobile overlay (only current player info)
     if (this.isMobileLayout) {
-      const playerText = `${this.currentPlayer.charAt(0).toUpperCase() + this.currentPlayer.slice(1)} player's turn`
-      const textWidth = this.ctx.measureText(playerText).width
-      this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'
-      this.ctx.fillRect(5, 5, Math.min(textWidth + 20, maxWidth + 10), 25)
-      this.ctx.fillStyle = this.currentPlayer === 'red' ? 'rgba(255, 150, 150, 0.95)' : 'rgba(150, 150, 255, 0.95)'
-      this.ctx.fillText(playerText, rightPanelX, currentY)
+      // No overlay for mobile - use HTML UI below canvas instead
       this.ctx.restore()
-      return // Exit early for mobile - use HTML UI below canvas instead
+      return
     }
     
     // Game state info (non-mobile)

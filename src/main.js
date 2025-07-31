@@ -37,6 +37,9 @@ gameBoard.updateMobileUI = function() {
     
     mobileStatus.innerHTML = `
       <div style="background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+        <div style="text-align: center; font-size: 16px; margin-bottom: 8px; color: ${this.currentPlayer === 'red' ? '#ff6666' : '#6666ff'}; font-weight: bold;">
+          ${this.currentPlayer.charAt(0).toUpperCase() + this.currentPlayer.slice(1)} Player's Turn
+        </div>
         <div style="text-align: center; font-size: 12px; margin-bottom: 8px; color: #ccc;">
           ${phaseText}
         </div>
