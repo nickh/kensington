@@ -2,7 +2,6 @@ export class GameBoard {
   constructor(canvas) {
     this.canvas = canvas
     this.ctx = canvas.getContext('2d')
-    this.boardImage = null
     this.isImageLoaded = false
     
     // Scale factor for responsive design
@@ -44,8 +43,11 @@ export class GameBoard {
     try {
       console.log('Starting GameBoard initialization...')
       
-      await this.loadBoardImage()
-      console.log('Board image loaded successfully')
+      // Set fixed board dimensions (no image needed)
+      this.boardWidth = 800
+      this.boardHeight = 600
+      this.isImageLoaded = true
+      console.log('Board dimensions set to 800x600')
       
       this.setupCanvas()
       console.log('Canvas setup complete')
@@ -61,7 +63,7 @@ export class GameBoard {
       console.log('Rhombitrihexagonal tiling shape initialized successfully!')
     } catch (error) {
       console.error('Failed to initialize:', error)
-      // Continue without board image
+      // This shouldn't happen now, but keep as fallback
       this.boardWidth = 800
       this.boardHeight = 600
       this.isImageLoaded = true
@@ -71,24 +73,6 @@ export class GameBoard {
       this.initializeGame()
       this.render()
     }
-  }
-
-  loadBoardImage() {
-    return new Promise((resolve, reject) => {
-      this.boardImage = new Image()
-      this.boardImage.onload = () => {
-        this.boardWidth = this.boardImage.width
-        this.boardHeight = this.boardImage.height
-        this.isImageLoaded = true
-        console.log(`Board image loaded: ${this.boardWidth}x${this.boardHeight}`)
-        resolve()
-      }
-      this.boardImage.onerror = (error) => {
-        console.error('Failed to load board image:', error)
-        reject(new Error('Failed to load board image'))
-      }
-      this.boardImage.src = './Kensington_board.svg.png'
-    })
   }
 
   setupCanvas() {
