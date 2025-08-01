@@ -79,11 +79,29 @@ gameBoard.updateMobileUI = function() {
   }
 }
 
-// Override the render method to update mobile UI
+// Override the render method to update mobile UI and clear loading message
 const originalRender = gameBoard.render.bind(gameBoard)
+let hasInitialized = false
 gameBoard.render = function() {
   originalRender()
   this.updateMobileUI()
+  
+  // Clear the initialization message on first render (after successful init)
+  if (!hasInitialized) {
+    hasInitialized = true
+    const gameInfo = document.querySelector('#game-info')
+    if (gameInfo) {
+      gameInfo.innerHTML = '' // Remove the loading message
+    }
+  }
 }
 
-gameBoard.init()
+// Initialize the game
+gameBoard.init().catch((error) => {
+  console.error('Game initialization failed:', error)
+  // Show error message if initialization fails
+  const gameInfo = document.querySelector('#game-info')
+  if (gameInfo) {
+    gameInfo.innerHTML = '<p style="color: red;">Failed to initialize game. Please refresh the page.</p>'
+  }
+})

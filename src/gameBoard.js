@@ -246,7 +246,7 @@ export class GameBoard {
       this.ctx.strokeStyle = '#ffff00'
       this.ctx.lineWidth = 3
       this.ctx.beginPath()
-      this.ctx.arc(this.selectedVertex.x, this.selectedVertex.y, 8.4, 0, 2 * Math.PI) // Scaled with token size increase
+      this.ctx.arc(this.selectedVertex.x, this.selectedVertex.y, 10.5, 0, 2 * Math.PI) // Scaled with token size increase
       this.ctx.stroke()
       this.ctx.restore()
     }
@@ -284,7 +284,7 @@ export class GameBoard {
     const verticalSpacing = unitSize * 1.2
     
     // Top row - Draw first Kensington Hexagon (left) - moved down slightly
-    const topY = scaledY - verticalSpacing + unitSize * 0.01 + 1 // Move red hexagons down 1 pixel
+    const topY = scaledY - verticalSpacing + unitSize * 0.01 + 2 // Move red hexagons down 2 pixels total
     const leftX = scaledX - hexagonSpacing / 2
     this.drawKensingtonHexagon(leftX, topY, unitSize, 1)
     
@@ -308,7 +308,7 @@ export class GameBoard {
     this.drawKensingtonHexagon(middleRightX, middleY, unitSize, 5)
     
     // Bottom row - Draw two more overlapping Kensington Hexagons
-    const bottomY = scaledY + verticalSpacing - unitSize * 0.01 - 1 // Move blue hexagons up 1 pixel
+    const bottomY = scaledY + verticalSpacing - unitSize * 0.01 - 2 // Move blue hexagons up 2 pixels total
     
     // Bottom left hexagon
     const bottomLeftX = scaledX - hexagonSpacing / 2
@@ -547,7 +547,7 @@ export class GameBoard {
         this.ctx.lineWidth = millHighlight ? 4 : 2
         
         this.ctx.beginPath()
-        this.ctx.arc(vertex.x, vertex.y, 6.3, 0, 2 * Math.PI) // Increased token size by 5%
+        this.ctx.arc(vertex.x, vertex.y, 7.875, 0, 2 * Math.PI) // Increased token size by 25% more (total ~31% increase from original)
         this.ctx.fill()
         this.ctx.stroke()
         
@@ -571,7 +571,7 @@ export class GameBoard {
           this.ctx.strokeStyle = glowColor
           this.ctx.lineWidth = 3
           this.ctx.beginPath()
-          this.ctx.arc(vertex.x, vertex.y, 10.5, 0, 2 * Math.PI) // Scaled with token size increase
+          this.ctx.arc(vertex.x, vertex.y, 13.125, 0, 2 * Math.PI) // Scaled with token size increase
           this.ctx.stroke()
         }
       } else {
